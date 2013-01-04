@@ -30,10 +30,17 @@
     THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ========================================================================== -->
 
+<!-- =========================================================================
+		nmap_fo.xls stylesheet version 1.001
+		last change: 2013-01-04
+		Gustave Walzer
+========================================================================== -->
+
+
 <xsl:stylesheet version="1.0" 
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
-	xmlns:fo="http://www.w3.org/1999/XSL/Format"
-	xmlns:fox="http://xml.apache.org/fop/extensions">
+	xmlns:fo="http://www.w3.org/1999/XSL/Format">
+
 <!-- Base Document -->
 <xsl:template match="/">
 	<fo:root>
@@ -44,76 +51,81 @@
 				<fo:region-after extent="1.5cm"/>
 			</fo:simple-page-master>
 		</fo:layout-master-set>
-	<fo:page-sequence master-reference="simple">
-		<fo:flow flow-name="xsl-region-body">
-			<xsl:apply-templates select="nmaprun"/>
-		</fo:flow>
-	</fo:page-sequence>
+
+		<fo:bookmark-tree>
+			<fo:bookmark internal-destination="summary">
+				<fo:bookmark-title>Summary</fo:bookmark-title>
+			</fo:bookmark>
+
+			<xsl:for-each select="nmaprun/host">
+
+				<xsl:sort select="substring ( address/@addr, 1, string-length ( substring-before ( address/@addr, '.' ) ) )* (256*256*256) + substring ( substring-after ( address/@addr, '.' ), 1, string-length ( substring-before ( substring-after ( address/@addr, '.' ), '.' ) ) )* (256*256) + substring ( substring-after ( substring-after ( address/@addr, '.' ), '.' ), 1, string-length ( substring-before ( substring-after ( substring-after ( address/@addr, '.' ), '.' ), '.' ) ) ) * 256 + substring ( substring-after ( substring-after ( substring-after ( address/@addr, '.' ), '.' ), '.' ), 1 )" order="ascending" data-type="number"/>
+
+				<fo:bookmark internal-destination="{generate-id()}">
+					<xsl:if test="count(hostnames/hostname) > 0">
+						<fo:bookmark-title><xsl:value-of select="hostnames/hostname/@name"/> (<xsl:value-of select="address/@addr"/>)</fo:bookmark-title>
+					</xsl:if>
+
+					<xsl:if test="count(hostnames/hostname) = 0">
+						<fo:bookmark-title><xsl:value-of select="address/@addr"/></fo:bookmark-title>
+					</xsl:if>
+				</fo:bookmark>
+			</xsl:for-each>
+		</fo:bookmark-tree>
+
+		<fo:page-sequence master-reference="simple">
+			<fo:flow flow-name="xsl-region-body">
+				<xsl:apply-templates select="nmaprun"/>
+			</fo:flow>
+		</fo:page-sequence>
 	</fo:root>
 </xsl:template>
 <!-- ............................................................ -->
 
 <!-- nmaprun -->
 <xsl:template match="nmaprun">
-	<fo:block font-size="14pt" font-family="sans-serif" background-color="#2A0D45" color="#FFFFFF" padding-top="3pt">
+	<fo:block font-size="14pt" font-family="sans-serif" background-color="#2A0D45" color="#FFFFFF" padding-top="3pt" id="head">
 	Nmap Scan Report - Scanned at <xsl:value-of select="@startstr"/>
 	</fo:block>
 
 	<fo:block font-size="8pt" font-family="sans-serif" padding-top="10pt" start-indent="20pt" text-align="left" color="#000000" >
-	<fo:inline font-weight="bold">Scan Summary</fo:inline>
+	<fo:basic-link internal-destination="summary"><fo:inline font-weight="bold">Scan Summary</fo:inline></fo:basic-link>
 
 	<xsl:if test="prescript/script/@id">
 		<xsl:text> | </xsl:text>
-		Pre-Scan Script Output
+		<fo:basic-link internal-destination="prescript"><fo:inline font-weight="bold">Pre-Scan Script Output</fo:inline></fo:basic-link>
 	</xsl:if>
 
 	<xsl:for-each select="host">
 		<xsl:sort select="substring ( address/@addr, 1, string-length ( substring-before ( address/@addr, '.' ) ) )* (256*256*256) + substring ( substring-after ( address/@addr, '.' ), 1, string-length ( substring-before ( substring-after ( address/@addr, '.' ), '.' ) ) )* (256*256) + substring ( substring-after ( substring-after ( address/@addr, '.' ), '.' ), 1, string-length ( substring-before ( substring-after ( substring-after ( address/@addr, '.' ), '.' ), '.' ) ) ) * 256 + substring ( substring-after ( substring-after ( substring-after ( address/@addr, '.' ), '.' ), '.' ), 1 )" order="ascending" data-type="number"/>
 
-		<xsl:text> | </xsl:text>
-		<xsl:choose>
-			<xsl:when test="status/@state = 'up'">
-			</xsl:when>
-			<xsl:otherwise>
-			</xsl:otherwise>
-		</xsl:choose>
+	<xsl:text> | </xsl:text>
 
 	<xsl:variable name="var_address" select="address/@addr" />
 	
 	<fo:inline font-size="8pt" font-family="sans-serif" font-weight="bold" padding-top="3pt" padding-bottom="3pt" text-align="left" background-color="#CCFFCC" color="#006400">
 	<xsl:if test="count(hostnames/hostname) > 0">
 		<xsl:for-each select="hostnames">
-			<xsl:choose>
-
-				<xsl:when test="hostname/@type='user'">
-				<xsl:value-of select="hostname/@name"/>
-				(<xsl:value-of select="$var_address"/>)
-				</xsl:when>
-
-				<xsl:otherwise>
-				<xsl:for-each select="hostname/@name[hostname/@type='PTR']"/>
-				<xsl:value-of select="hostname/@name"/> (<xsl:value-of select="$var_address"/>)
-				</xsl:otherwise>
-
-			</xsl:choose>
+			<fo:basic-link internal-destination="{generate-id(..)}"><xsl:value-of select="hostname/@name"/> (<xsl:value-of select="$var_address"/>)</fo:basic-link>
 		</xsl:for-each>
 	</xsl:if>
 
 	<xsl:if test="count(hostnames/hostname) = 0">
-		<xsl:value-of select="address/@addr"/>
+		<fo:basic-link internal-destination="{generate-id()}"><xsl:value-of select="address/@addr"/></fo:basic-link>
 	</xsl:if>
 	</fo:inline>
 	
 	</xsl:for-each>
 
 	<xsl:if test="postscript/script/@id">
-	<xsl:text> | </xsl:text>Post-Scan Script Output
+	<xsl:text> | </xsl:text>
+	<fo:basic-link internal-destination="postscript"><fo:inline font-weight="bold">Post-Scan Script Output</fo:inline></fo:basic-link>
 	</xsl:if>
 	</fo:block>
 	
 	<fo:block>&#160;</fo:block>
 	
-	<fo:block font-size="11pt" font-family="sans-serif" font-weight="bold" padding-top="3pt" text-align="left" background-color="#F0F8FF" color="#000000">
+	<fo:block font-size="11pt" font-family="sans-serif" font-weight="bold" padding-top="3pt" text-align="left" background-color="#F0F8FF" color="#000000" id="summary">
 	Scan Summary
 	</fo:block>
 	
@@ -138,9 +150,20 @@
 	<xsl:value-of select="/nmaprun/runstats/finished/@summary" />
 	</fo:block>
 
+	<fo:block font-size="6pt" font-family="sans-serif" padding-top="10pt">
+	<fo:basic-link internal-destination="head">back to top</fo:basic-link>
+	</fo:block>
+
 	<fo:block>&#160;</fo:block>
 
-	<xsl:apply-templates select="host"/>
+	<xsl:apply-templates select="prescript"/>
+
+	<xsl:apply-templates select="host">
+		<xsl:sort select="substring ( address/@addr, 1, string-length ( substring-before ( address/@addr, '.' ) ) )* (256*256*256) + substring ( substring-after ( address/@addr, '.' ), 1, string-length ( substring-before ( substring-after ( address/@addr, '.' ), '.' ) ) )* (256*256) + substring ( substring-after ( substring-after ( address/@addr, '.' ), '.' ), 1, string-length ( substring-before ( substring-after ( substring-after ( address/@addr, '.' ), '.' ), '.' ) ) ) * 256 + substring ( substring-after ( substring-after ( substring-after ( address/@addr, '.' ), '.' ), '.' ), 1 )" order="ascending" data-type="number"/>
+	</xsl:apply-templates>
+
+	<xsl:apply-templates select="postscript"/>
+
 </xsl:template>
 <!-- ............................................................ -->
 
@@ -150,7 +173,7 @@
 <xsl:choose>
 
 	<xsl:when test="status/@state = 'up'">
-	<fo:block font-size="11pt" font-family="sans-serif" font-weight="bold" background-color="#CCFFCC" padding-top="3pt" padding-left="3pt" color="#000000">
+	<fo:block font-size="11pt" font-family="sans-serif" font-weight="bold" background-color="#CCFFCC" padding-top="3pt" padding-left="3pt" color="#000000" id="{generate-id()}" ref-id="{generate-id()}">
 	<xsl:value-of select="address/@addr"/>
 	<xsl:if test="count(hostnames/hostname) > 0">
 		<xsl:for-each select="hostnames/hostname">
@@ -197,7 +220,7 @@ Address
 
 <xsl:apply-templates/>
 
-<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold" padding-top="10pt" padding-bottom="5pt">
+<fo:block font-family="sans-serif" font-size="10pt" font-weight="bold" padding-top="10pt" padding-bottom="5pt">
 Misc Metrics
 </fo:block>
 
@@ -282,6 +305,14 @@ Misc Metrics
 
 	</fo:table-body>
 </fo:table>
+
+<fo:block>&#160;</fo:block>
+
+<fo:block font-size="6pt" font-family="sans-serif">
+<fo:basic-link internal-destination="head">Back to top</fo:basic-link>
+</fo:block>
+
+<fo:block>&#160;</fo:block>
 
 </xsl:template>
 <!-- ............................................................ -->
@@ -373,7 +404,6 @@ Ports
 <!-- port -->
 <xsl:template match="port">
 
-<!-- <fo:table-row>-->
 <xsl:choose>
 	<xsl:when test="state/@state = 'open'">
 		<fo:table-row>
@@ -525,7 +555,7 @@ Ports
 		</fo:table-row>
 	</xsl:otherwise>
 </xsl:choose>
-<!-- </fo:table-row> -->
+
 </xsl:template>
 <!-- ............................................................ -->
 
@@ -619,11 +649,13 @@ If you know what OS is running on it, see http://nmap.org/submit/
 
 <!-- Pre-Scan script -->
 <xsl:template match="prescript">
-<fo:block font-family="sans-serif" font-size="11pt" font-weight="bold" padding-top="10pt" padding-bottom="5pt" background-color="#F0F8FF">
+<fo:block font-family="sans-serif" font-size="11pt" font-weight="bold" padding-top="3" background-color="#F0F8FF" id="prescript">
 Pre-Scan Script Output
 </fo:block>
 
-<fo:table>
+<fo:block>&#160;</fo:block>
+
+<fo:table start-indent="10pt">
 	<fo:table-header>
 		<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
 			<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">Script Name</fo:block>
@@ -636,14 +668,14 @@ Pre-Scan Script Output
 	<fo:table-body>
 		<fo:table-row>
 		<xsl:for-each select="script">
-			<fo:table-cell border="solid black 1px">
+			<fo:table-cell background-color="#EFFFF7" border="solid black 1px">
 				<fo:block font-family="sans-serif" font-size="8pt">
-				<xsl:value-of select="@id"/> <xsl:text>&#xA0;</xsl:text>
+				<xsl:value-of select="@id"/>
 				</fo:block>
 			</fo:table-cell>
-			<fo:table-cell border="solid black 1px">
-				<fo:block font-family="sans-serif" font-size="8pt">
-				<xsl:value-of select="@output"/> <xsl:text></xsl:text>
+			<fo:table-cell background-color="#EFFFF7"  border="solid black 1px">
+				<fo:block font-family="sans-serif" font-size="8pt" white-space-treatment="preserve" white-space-collapse="false" linefeed-treatment="preserve">
+				<xsl:value-of select="@output"/><xsl:text>&#xA0;</xsl:text>
 				</fo:block>
 			</fo:table-cell>
 		</xsl:for-each>
@@ -652,12 +684,18 @@ Pre-Scan Script Output
 
 </fo:table>
 
+<fo:block font-size="6pt" font-family="sans-serif" padding-top="10pt">
+<fo:basic-link internal-destination="head">Back to top</fo:basic-link>
+</fo:block>
+
+<fo:block>&#160;</fo:block>
+	
 </xsl:template>
 <!-- ............................................................ -->
 
 <!-- Post-Scan Script -->
 <xsl:template match="postscript">
-<fo:block font-family="sans-serif" font-size="11pt" font-weight="bold" padding-top="10pt" padding-bottom="5pt" background-color="#F0F8FF">
+<fo:block font-family="sans-serif" font-size="11pt" font-weight="bold" padding-top="10pt" padding-bottom="5pt" background-color="#F0F8FF" id="postscript">
 Post-Scan Script Output
 </fo:block>
 
@@ -674,14 +712,14 @@ Post-Scan Script Output
 	<fo:table-body>
 		<fo:table-row>
 		<xsl:for-each select="script">
-			<fo:table-cell border="solid black 1px">
+			<fo:table-cell background-color="#EFFFF7"  border="solid black 1px">
 				<fo:block font-family="sans-serif" font-size="8pt">
 				<xsl:value-of select="@id"/> <xsl:text>&#xA0;</xsl:text>
 				</fo:block>
 			</fo:table-cell>
-			<fo:table-cell border="solid black 1px">
+			<fo:table-cell background-color="#EFFFF7"  border="solid black 1px" white-space-treatment="preserve" white-space-collapse="false" linefeed-treatment="preserve">
 				<fo:block font-family="sans-serif" font-size="8pt">
-				<xsl:value-of select="@output"/> <xsl:text></xsl:text>
+				<xsl:value-of select="@output"/> <xsl:text>&#xA0;</xsl:text>
 				</fo:block>
 			</fo:table-cell>
 		</xsl:for-each>
@@ -689,13 +727,19 @@ Post-Scan Script Output
 	</fo:table-body>
 
 </fo:table>
+	
+<fo:block font-size="6pt" font-family="sans-serif" padding-top="10pt">
+<fo:basic-link internal-destination="head">Back to top</fo:basic-link>
+</fo:block>
 
+<fo:block>&#160;</fo:block>
+	
 </xsl:template>
 <!-- ............................................................ -->
 
 <!-- Host-Scan Script -->
 <xsl:template match="hostscript">
-<fo:block font-family="sans-serif" font-size="11pt" font-weight="bold" padding-top="10pt" padding-bottom="5pm" background-color="#F0F8FF">
+<fo:block font-family="sans-serif" font-size="11pt" font-weight="bold" padding-top="10pt" padding-bottom="5pm" background-color="#F0F8FF" id="hostscript">
 Host-Scan Script Output
 </fo:block>
 
@@ -712,14 +756,14 @@ Host-Scan Script Output
 	<fo:table-body>
 		<fo:table-row>
 		<xsl:for-each select="script">
-			<fo:table-cell border="solid black 1px">
+			<fo:table-cell background-color="#EFFFF7"  border="solid black 1px">
 				<fo:block font-family="sans-serif" font-size="8pt">
-				<xsl:value-of select="@id"/> <xsl:text>&#xA0;</xsl:text>
+				<xsl:value-of select="@id"/>
 				</fo:block>
 			</fo:table-cell>
-			<fo:table-cell border="solid black 1px">
+			<fo:table-cell background-color="#EFFFF7"  border="solid black 1px" white-space-treatment="preserve" white-space-collapse="false" linefeed-treatment="preserve">
 				<fo:block font-family="sans-serif" font-size="8pt">
-				<xsl:value-of select="@output"/> <xsl:text></xsl:text>
+				<xsl:value-of select="@output"/> <xsl:text>&#xA0;</xsl:text>
 				</fo:block>
 			</fo:table-cell>
 		</xsl:for-each>
@@ -727,7 +771,13 @@ Host-Scan Script Output
 	</fo:table-body>
 
 </fo:table>
+	
+<fo:block font-size="6pt" font-family="sans-serif" padding-top="10pt">
+<fo:basic-link internal-destination="head">back to top</fo:basic-link>
+</fo:block>
 
+<fo:block>&#160;</fo:block>
+	
 </xsl:template>
 <!-- ............................................................ -->
 
@@ -754,72 +804,77 @@ Traceroute Information
 </fo:block>
 
 <xsl:choose>
-<xsl:when test="@port">
-<fo:block font-family="sans-serif" font-size="8pt">
-Traceroute data generated using port <xsl:value-of select="@port" />/<xsl:value-of select="@proto"/>
-</fo:block>
-</xsl:when>
+	<xsl:when test="@port">
+		<fo:block font-family="sans-serif" font-size="8pt">
+		Traceroute data generated using port <xsl:value-of select="@port" />/<xsl:value-of select="@proto"/>
+		</fo:block>
+	</xsl:when>
+	<xsl:when test="@proto='icmp'">
+		<fo:block font-family="sans-serif" font-size="8pt">
+		Traceroute data generated using ICMP
+		</fo:block>
+	</xsl:when>
 </xsl:choose>
 
 <fo:table>
-<fo:table-header>
-<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
-<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">Hop</fo:block>
-</fo:table-cell>
-<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
-<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">RTT</fo:block>
-</fo:table-cell>
-<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
-<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">IP</fo:block>
-</fo:table-cell>
-<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
-<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">Host</fo:block>
-</fo:table-cell>
-</fo:table-header>
+	<fo:table-header>
+		<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
+			<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">Hop</fo:block>
+		</fo:table-cell>
+		<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
+			<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">RTT</fo:block>
+		</fo:table-cell>
+			<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
+		<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">IP</fo:block>
+		</fo:table-cell>
+		<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
+			<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">Host</fo:block>
+		</fo:table-cell>
+	</fo:table-header>
 
-<fo:table-body>
-<xsl:for-each select="hop">
-<fo:table-row>
-<xsl:choose>
-<xsl:when test="@rtt = '--'">
-<fo:table-cell background-color="#F2F2F2" border="solid black 1px" width="25pt">
-<fo:block font-family="sans-serif" font-size="8pt"><xsl:value-of select="@ttl"/></fo:block>
-</fo:table-cell>
-<fo:table-cell background-color="#F2F2F2" border="solid black 1px" width="45pt">
-<fo:block font-family="sans-serif" font-size="8pt">--</fo:block>
-</fo:table-cell>
-<fo:table-cell background-color="#F2F2F2" border="solid black 1px" width="70pt">
-<fo:block font-family="sans-serif" font-size="8pt"><xsl:value-of select="@ipaddr"/></fo:block>
-</fo:table-cell>
-<fo:table-cell background-color="#F2F2F2" border="solid black 1px">
-<fo:block font-family="sans-serif" font-size="8pt"><xsl:value-of select="@host"/></fo:block>
-</fo:table-cell>
-</xsl:when>
+	<fo:table-body>
+		<xsl:for-each select="hop">
+			<fo:table-row>
+			<xsl:choose>
+				<xsl:when test="@rtt = '--'">
+					<fo:table-cell background-color="#F2F2F2" border="solid black 1px" width="25pt">
+						<fo:block font-family="sans-serif" font-size="8pt"><xsl:value-of select="@ttl"/></fo:block>
+					</fo:table-cell>
+					<fo:table-cell background-color="#F2F2F2" border="solid black 1px" width="45pt">
+						<fo:block font-family="sans-serif" font-size="8pt">--</fo:block>
+					</fo:table-cell>
+					<fo:table-cell background-color="#F2F2F2" border="solid black 1px" width="70pt">
+						<fo:block font-family="sans-serif" font-size="8pt"><xsl:value-of select="@ipaddr"/></fo:block>
+					</fo:table-cell>
+					<fo:table-cell background-color="#F2F2F2" border="solid black 1px">
+						<fo:block font-family="sans-serif" font-size="8pt"><xsl:value-of select="@host"/></fo:block>
+					</fo:table-cell>
+				</xsl:when>
 
-<xsl:when test="@rtt > 0">
-<fo:table-cell background-color="#CCFFCC" border="solid black 1px" width="25pt">
-<fo:block font-family="sans-serif" font-size="8pt"><xsl:value-of select="@ttl"/></fo:block>
-</fo:table-cell>
-<fo:table-cell background-color="#CCFFCC" border="solid black 1px" width="45pt">
-<fo:block font-family="sans-serif" font-size="8pt"><xsl:value-of select="@rtt"/></fo:block>
-</fo:table-cell>
-<fo:table-cell background-color="#CCFFCC" border="solid black 1px" width="70pt">
-<fo:block font-family="sans-serif" font-size="8pt"><xsl:value-of select="@ipaddr"/></fo:block>
-</fo:table-cell>
-<fo:table-cell background-color="#CCFFCC" border="solid black 1px">
-<fo:block font-family="sans-serif" font-size="8pt"><xsl:value-of select="@host"/></fo:block>
-</fo:table-cell>
-</xsl:when>
+				<xsl:when test="@rtt > 0">
+					<fo:table-cell background-color="#CCFFCC" border="solid black 1px" width="25pt">
+						<fo:block font-family="sans-serif" font-size="8pt"><xsl:value-of select="@ttl"/></fo:block>
+					</fo:table-cell>
+					<fo:table-cell background-color="#CCFFCC" border="solid black 1px" width="45pt">
+						<fo:block font-family="sans-serif" font-size="8pt"><xsl:value-of select="@rtt"/></fo:block>
+					</fo:table-cell>
+					<fo:table-cell background-color="#CCFFCC" border="solid black 1px" width="70pt">
+						<fo:block font-family="sans-serif" font-size="8pt"><xsl:value-of select="@ipaddr"/></fo:block>
+					</fo:table-cell>
+					<fo:table-cell background-color="#CCFFCC" border="solid black 1px">
+						<fo:block font-family="sans-serif" font-size="8pt"><xsl:value-of select="@host"/></fo:block>
+					</fo:table-cell>
+				</xsl:when>
 
-<xsl:otherwise>
-<fo:table-cell border="solid black 1px" background-color="#F2F2F2" width="25pt">
-<fo:block font-family="sans-serif" font-size="8pt"><xsl:value-of select="@ttl"/></fo:block>
-</fo:table-cell>
-</xsl:otherwise>
-</xsl:choose>
-</fo:table-row>
-</xsl:for-each>
-</fo:table-body>
+				<xsl:otherwise>
+					<fo:table-cell border="solid black 1px" background-color="#F2F2F2" width="25pt">
+						<fo:block font-family="sans-serif" font-size="8pt"><xsl:value-of select="@ttl"/></fo:block>
+					</fo:table-cell>
+				</xsl:otherwise>
+				</xsl:choose>
+				</fo:table-row>
+		</xsl:for-each>
+	</fo:table-body>
 
 </fo:table>
 
