@@ -173,7 +173,7 @@
 <xsl:choose>
 
 	<xsl:when test="status/@state = 'up'">
-	<fo:block font-size="11pt" font-family="sans-serif" font-weight="bold" background-color="#CCFFCC" padding-top="3pt" padding-left="3pt" color="#000000" id="{generate-id()}" ref-id="{generate-id()}">
+	<fo:block font-size="11pt" font-family="sans-serif" font-weight="bold" background-color="#CCFFCC" padding-top="3pt" padding-left="3pt" color="#000000" id="{generate-id()}">
 	<xsl:value-of select="address/@addr"/>
 	<xsl:if test="count(hostnames/hostname) > 0">
 		<xsl:for-each select="hostnames/hostname">
@@ -185,7 +185,7 @@
 	</xsl:when>
 
 	<xsl:otherwise>
-	<fo:block font-size="11pt" font-family="sans-serif" background-color="#F2F2F2" color="#000000">
+	<fo:block font-size="11pt" font-family="sans-serif" font-weight="bold" background-color="#CCFFCC" padding-top="3pt" padding-left="3pt" id="{generate-id()}">
 	<xsl:value-of select="address/@addr"/>
 	<xsl:if test="count(hostnames/hostname) > 0">
 	<xsl:for-each select="hostnames/hostname">
