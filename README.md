@@ -3,7 +3,7 @@ nmap-to-fo
 
 Conver nmap XML directly in to XML-FO
 
-This xsl file will convert the output of nmap -oX directly into usage XML-FO that can be easily converted into pdfs
+This xsl file will convert the output of nmap -oX directly into XML-FO that can be easily converted into pdfs
 
 Installation
 ===============
@@ -13,16 +13,16 @@ Installation
 Dependencies
 ===============
 
-To convert the outputed xml file into a working pdf fop version 1.1rc1 from:
+To convert the outputted xml file into a working pdf use fop from:
 
-[http://apache.mirrors.pair.com/xmlgraphics/fop/binaries/fop-1.1rc1-bin.zip]
+[http://apache.mirrors.pair.com/xmlgraphics/fop/binaries]
 
 Usage
 ==============
 
-1. run nmap with -oX flag for xml output
-    $ nmap -oX ./nmap.scan.xml localhost
+* Run nmap with -oX flag for xml output
+$ nmap -oX ./nmap.scan.xml localhost
 
-2. convert output xml to pdf using the above xsl file
-    $ fop -xml nmap.scan.xml -xls nmap_fo.xsl -pdf nmap.scan.pdf
+* Convert output xml to pdf using the above xsl file
+$ fop -xml nmap.scan.xml -xls nmap_fo.xsl -pdf nmap.scan.pdf
 
