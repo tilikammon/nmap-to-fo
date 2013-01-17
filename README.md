@@ -20,11 +20,10 @@ To convert the outputted xml file into a working pdf use fop from:
 Usage
 ==============
 
-* Run nmap with -oX flag for xml output
-	
-	nmap -oX ./nmap.scan.xml localhost
+* Run nmap with -oX flag for xml output:
+	`nmap -oX ./nmap.scan.xml localhost`
 
-* Convert output xml to pdf using the above xsl file with fop
-	
-	fop -xml nmap.scan.xml -xls nmap_fo.xsl -pdf nmap.scan.pdf
+
+* Convert output xml to pdf using the above xsl file with fop:
+	`fop -xml nmap.scan.xml -xls nmap_fo.xsl -pdf nmap.scan.pdf`
 
