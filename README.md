@@ -8,7 +8,7 @@ This xsl file will convert the output of nmap -oX directly into XML-FO that can 
 Installation
 ===============
 
-*Latest version: [https://github.com/tilikammon/nmap-to-fo]
+* Latest version: [https://github.com/tilikammon/nmap-to-fo]
 
 Dependencies
 ===============
@@ -21,8 +21,8 @@ Usage
 ==============
 
 * Run nmap with -oX flag for xml output
-nmap -oX ./nmap.scan.xml localhost
+	nmap -oX ./nmap.scan.xml localhost
 
 * Convert output xml to pdf using the above xsl file with fop
-fop -xml nmap.scan.xml -xls nmap_fo.xsl -pdf nmap.scan.pdf
+	fop -xml nmap.scan.xml -xls nmap_fo.xsl -pdf nmap.scan.pdf
 
