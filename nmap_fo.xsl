@@ -56,8 +56,8 @@
 			<fo:bookmark internal-destination="summary">
 				<fo:bookmark-title>Summary</fo:bookmark-title>
 			</fo:bookmark>
-
-			<xsl:if test="prescript">
+			
+			<xsl:if test="/nmaprun/prescript">
 				<fo:bookmark internal-destination="prescript">
 					<fo:bookmark-title>Pre-Scan Script Output</fo:bookmark-title>
 				</fo:bookmark>
@@ -67,16 +67,6 @@
 
 				<xsl:sort select="substring ( address/@addr, 1, string-length ( substring-before ( address/@addr, '.' ) ) )* (256*256*256) + substring ( substring-after ( address/@addr, '.' ), 1, string-length ( substring-before ( substring-after ( address/@addr, '.' ), '.' ) ) )* (256*256) + substring ( substring-after ( substring-after ( address/@addr, '.' ), '.' ), 1, string-length ( substring-before ( substring-after ( substring-after ( address/@addr, '.' ), '.' ), '.' ) ) ) * 256 + substring ( substring-after ( substring-after ( substring-after ( address/@addr, '.' ), '.' ), '.' ), 1 )" order="ascending" data-type="number"/>
 
-				<!-- <fo:bookmark internal-destination="host.{generate-id()}">
-					<xsl:if test="count(hostnames/hostname) > 0">
-						<fo:bookmark-title><xsl:value-of select="hostnames/hostname/@name"/> (<xsl:value-of select="address/@addr"/>)</fo:bookmark-title>
-					</xsl:if>
-
-					<xsl:if test="count(hostnames/hostname) = 0">
-						<fo:bookmark-title><xsl:value-of select="address/@addr"/></fo:bookmark-title>
-					</xsl:if>
-				</fo:bookmark> -->
-				
 				<fo:bookmark internal-destination="host.{generate-id()}">
 					<fo:bookmark-title>
 						<xsl:if test="count(hostnames/hostname) > 0">
@@ -120,7 +110,7 @@
 				</fo:bookmark>
 			</xsl:for-each>
 			
-			<xsl:if test="postscript">
+			<xsl:if test="/nmaprun/postscript">
 				<fo:bookmark internal-destination="postscript">
 					<fo:bookmark-title>Post-Scan Script Output</fo:bookmark-title>
 				</fo:bookmark>
@@ -183,7 +173,6 @@
 	<fo:block font-size="11pt" font-family="sans-serif" font-weight="bold" padding-top="3pt" text-align="left" background-color="#F0F8FF" color="#000000" id="summary">
 	Scan Summary
 	</fo:block>
-	
 	
 	<fo:block font-size="8pt" font-family="sans-serif" padding-top="6pt" color="#000000">
 	Nmap <xsl:value-of select="@version" /> was initiated at <xsl:value-of select="/nmaprun/@startstr" /> with these arguments:
@@ -252,7 +241,6 @@
 	</fo:block>
 	</xsl:otherwise>
 </xsl:choose>
-
 
 <fo:block font-size="10pt" font-family="sans-serif" font-weight="bold" padding-top="10pt" padding-bottom="5pt" color="#000000" id="address.{generate-id()}">
 Address
@@ -651,54 +639,56 @@ Remote Operating System Detection
 <fo:block>&#160;</fo:block>
 
 <xsl:choose>
-<xsl:when test="count(../osmatch)=0">
-<fo:block font-family="sans-serif" font-size="10pt" font-weight="bold">
-Cannot determine exact operating system.  Fingerprint provided below.
-If you know what OS is running on it, see http://nmap.org/submit/
-</fo:block>
+	<xsl:when test="count(../osmatch)=0">
+	<fo:block font-family="sans-serif" font-size="10pt" font-weight="bold">
+	Cannot determine exact operating system.  Fingerprint provided below.
+	If you know what OS is running on it, see http://nmap.org/submit/
+	</fo:block>
 
-<fo:table>
-	<fo:table-header>
-		<fo:table-cell border="solid black 1px" background-color="#E1E1E1">
-			<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">
-			Operating System fingerprint
-			</fo:block>
-		</fo:table-cell>
-	</fo:table-header>
+	<fo:table>
+		<fo:table-header>
+			<fo:table-row>
+				<fo:table-cell border="solid black 1px" background-color="#E1E1E1">
+					<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">
+					Operating System fingerprint
+					</fo:block>
+				</fo:table-cell>
+			</fo:table-row>
+		</fo:table-header>
 
-	<fo:table-body>
-		<fo:table-row>
-			<fo:table-cell border="solid black 1px">
-				<fo:block font-family="sans-serif" font-size="8pt">
-				<xsl:value-of select="@fingerprint"/>
+		<fo:table-body>
+			<fo:table-row>
+				<fo:table-cell border="solid black 1px">
+					<fo:block font-family="sans-serif" font-size="8pt">
+					<xsl:value-of select="@fingerprint"/>
+					</fo:block>
+				</fo:table-cell>
+			</fo:table-row>
+		</fo:table-body>
+	</fo:table>
+	</xsl:when>
+
+	<xsl:otherwise>
+	<fo:table>
+		<fo:table-header>
+			<fo:table-cell border="solid black 1px" background-color="#E1E1E1">
+				<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">
+				Operating System fingerprint
 				</fo:block>
 			</fo:table-cell>
-		</fo:table-row>
-	</fo:table-body>
-</fo:table>
-</xsl:when>
+		</fo:table-header>
 
-<xsl:otherwise>
-<fo:table>
-	<fo:table-header>
-		<fo:table-cell border="solid black 1px" background-color="#E1E1E1">
-			<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">
-			Operating System fingerprint
-			</fo:block>
-		</fo:table-cell>
-	</fo:table-header>
-
-	<fo:table-body>
-		<fo:table-row>
-			<fo:table-cell border="solid black 1px">
-				<fo:block font-family="sans-serif" font-size="8pt">
-				<xsl:value-of select="@fingerprint"/>
-				</fo:block>
-		</fo:table-cell>
-		</fo:table-row>
-	</fo:table-body>
-</fo:table>
-</xsl:otherwise>
+		<fo:table-body>
+			<fo:table-row>
+				<fo:table-cell border="solid black 1px">
+					<fo:block font-family="sans-serif" font-size="8pt">
+					<xsl:value-of select="@fingerprint"/>
+					</fo:block>
+			</fo:table-cell>
+			</fo:table-row>
+		</fo:table-body>
+	</fo:table>
+	</xsl:otherwise>
 
 </xsl:choose>
 
@@ -715,29 +705,31 @@ Pre-Scan Script Output
 
 <fo:table start-indent="10pt">
 	<fo:table-header>
-		<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
-			<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">Script Name</fo:block>
-		</fo:table-cell>
-		<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
-			<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">Output</fo:block>
-		</fo:table-cell>
+		<fo:table-row>
+			<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
+				<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">Script Name</fo:block>
+			</fo:table-cell>
+			<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
+				<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">Output</fo:block>
+			</fo:table-cell>
+		</fo:table-row>
 	</fo:table-header>
 
 	<fo:table-body>
-		<fo:table-row>
 		<xsl:for-each select="script">
-			<fo:table-cell background-color="#EFFFF7" border="solid black 1px">
-				<fo:block font-family="sans-serif" font-size="8pt">
-				<xsl:value-of select="@id"/>
-				</fo:block>
-			</fo:table-cell>
-			<fo:table-cell background-color="#EFFFF7"  border="solid black 1px">
-				<fo:block font-family="sans-serif" font-size="8pt" white-space-treatment="preserve" white-space-collapse="false" linefeed-treatment="preserve">
-				<xsl:value-of select="@output"/><xsl:text>&#xA0;</xsl:text>
-				</fo:block>
-			</fo:table-cell>
+			<fo:table-row>
+				<fo:table-cell background-color="#EFFFF7" border="solid black 1px">
+					<fo:block font-family="sans-serif" font-size="8pt">
+					<xsl:value-of select="@id"/>
+					</fo:block>
+				</fo:table-cell>
+				<fo:table-cell background-color="#EFFFF7"  border="solid black 1px">
+					<fo:block font-family="sans-serif" font-size="8pt" white-space-treatment="preserve" white-space-collapse="false" linefeed-treatment="preserve">
+					<xsl:value-of select="@output"/><xsl:text>&#xA0;</xsl:text>
+					</fo:block>
+				</fo:table-cell>
+			</fo:table-row>
 		</xsl:for-each>
-		</fo:table-row>
 	</fo:table-body>
 
 </fo:table>
@@ -761,29 +753,31 @@ Post-Scan Script Output
 
 <fo:table>
 	<fo:table-header>
-		<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
-			<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">Script Name</fo:block>
-		</fo:table-cell>
-		<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
-			<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">Output</fo:block>
-		</fo:table-cell>
+		<fo:table-row>
+			<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
+				<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">Script Name</fo:block>
+			</fo:table-cell>
+			<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
+				<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">Output</fo:block>
+			</fo:table-cell>
+		</fo:table-row>
 	</fo:table-header>
 
 	<fo:table-body>
-		<fo:table-row>
 		<xsl:for-each select="script">
-			<fo:table-cell background-color="#EFFFF7"  border="solid black 1px">
-				<fo:block font-family="sans-serif" font-size="8pt">
-				<xsl:value-of select="@id"/> <xsl:text>&#xA0;</xsl:text>
-				</fo:block>
-			</fo:table-cell>
-			<fo:table-cell background-color="#EFFFF7"  border="solid black 1px" white-space-treatment="preserve" white-space-collapse="false" linefeed-treatment="preserve">
-				<fo:block font-family="sans-serif" font-size="8pt">
-				<xsl:value-of select="@output"/> <xsl:text>&#xA0;</xsl:text>
-				</fo:block>
-			</fo:table-cell>
+			<fo:table-row>
+				<fo:table-cell background-color="#EFFFF7"  border="solid black 1px">
+					<fo:block font-family="sans-serif" font-size="8pt">
+					<xsl:value-of select="@id"/> <xsl:text>&#xA0;</xsl:text>
+					</fo:block>
+				</fo:table-cell>
+				<fo:table-cell background-color="#EFFFF7"  border="solid black 1px" white-space-treatment="preserve" white-space-collapse="false" linefeed-treatment="preserve">
+					<fo:block font-family="sans-serif" font-size="8pt">
+					<xsl:value-of select="@output"/> <xsl:text>&#xA0;</xsl:text>
+					</fo:block>
+				</fo:table-cell>
+			</fo:table-row>
 		</xsl:for-each>
-		</fo:table-row>
 	</fo:table-body>
 
 </fo:table>
@@ -810,33 +804,35 @@ Host-Scan Script Output
 
 <fo:table>
 	<fo:table-header>
-		<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
-			<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">Script Name</fo:block>
-		</fo:table-cell>
-		<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
-			<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">Output</fo:block>
-		</fo:table-cell>
+		<fo:table-row>
+			<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
+				<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">Script Name</fo:block>
+			</fo:table-cell>
+			<fo:table-cell background-color="#E1E1E1" border="solid black 1px">
+				<fo:block font-family="sans-serif" font-size="8pt" font-weight="bold">Output</fo:block>
+			</fo:table-cell>
+		</fo:table-row>
 	</fo:table-header>
 
 	<fo:table-body>
-		<fo:table-row>
 		<xsl:for-each select="script">
-			<fo:table-cell background-color="#EFFFF7"  border="solid black 1px">
-				<fo:block font-family="sans-serif" font-size="8pt">
-				<xsl:value-of select="@id"/>
-				</fo:block>
-			</fo:table-cell>
-			<fo:table-cell background-color="#EFFFF7"  border="solid black 1px" white-space-treatment="preserve" white-space-collapse="false" linefeed-treatment="preserve">
-				<fo:block font-family="sans-serif" font-size="8pt">
-				<xsl:value-of select="@output"/> <xsl:text>&#xA0;</xsl:text>
-				</fo:block>
-			</fo:table-cell>
+			<fo:table-row>
+				<fo:table-cell background-color="#EFFFF7"  border="solid black 1px">
+					<fo:block font-family="sans-serif" font-size="8pt">
+					<xsl:value-of select="@id"/>
+					</fo:block>
+				</fo:table-cell>
+				<fo:table-cell background-color="#EFFFF7"  border="solid black 1px" white-space-treatment="preserve" white-space-collapse="false" linefeed-treatment="preserve">
+					<fo:block font-family="sans-serif" font-size="8pt">
+					<xsl:value-of select="@output"/> <xsl:text>&#xA0;</xsl:text>
+					</fo:block>
+				</fo:table-cell>
+			</fo:table-row>
 		</xsl:for-each>
-		</fo:table-row>
 	</fo:table-body>
 
 </fo:table>
-	
+
 <fo:block font-size="6pt" font-family="sans-serif" padding-top="10pt">
 <fo:basic-link internal-destination="head">back to top</fo:basic-link>
 </fo:block>
@@ -874,6 +870,7 @@ Traceroute Information
 		Traceroute data generated using port <xsl:value-of select="@port" />/<xsl:value-of select="@proto"/>
 		</fo:block>
 	</xsl:when>
+
 	<xsl:when test="@proto='icmp'">
 		<fo:block font-family="sans-serif" font-size="8pt">
 		Traceroute data generated using ICMP
