@@ -57,11 +57,17 @@
 				<fo:bookmark-title>Summary</fo:bookmark-title>
 			</fo:bookmark>
 
+			<xsl:if test="prescript">
+				<fo:bookmark internal-destination="prescript">
+					<fo:bookmark-title>Pre-Scan Script Output</fo:bookmark-title>
+				</fo:bookmark>
+			</xsl:if>
+
 			<xsl:for-each select="nmaprun/host">
 
 				<xsl:sort select="substring ( address/@addr, 1, string-length ( substring-before ( address/@addr, '.' ) ) )* (256*256*256) + substring ( substring-after ( address/@addr, '.' ), 1, string-length ( substring-before ( substring-after ( address/@addr, '.' ), '.' ) ) )* (256*256) + substring ( substring-after ( substring-after ( address/@addr, '.' ), '.' ), 1, string-length ( substring-before ( substring-after ( substring-after ( address/@addr, '.' ), '.' ), '.' ) ) ) * 256 + substring ( substring-after ( substring-after ( substring-after ( address/@addr, '.' ), '.' ), '.' ), 1 )" order="ascending" data-type="number"/>
 
-				<fo:bookmark internal-destination="{generate-id()}">
+				<!-- <fo:bookmark internal-destination="host.{generate-id()}">
 					<xsl:if test="count(hostnames/hostname) > 0">
 						<fo:bookmark-title><xsl:value-of select="hostnames/hostname/@name"/> (<xsl:value-of select="address/@addr"/>)</fo:bookmark-title>
 					</xsl:if>
@@ -69,8 +75,57 @@
 					<xsl:if test="count(hostnames/hostname) = 0">
 						<fo:bookmark-title><xsl:value-of select="address/@addr"/></fo:bookmark-title>
 					</xsl:if>
+				</fo:bookmark> -->
+				
+				<fo:bookmark internal-destination="host.{generate-id()}">
+					<fo:bookmark-title>
+						<xsl:if test="count(hostnames/hostname) > 0">
+							<xsl:value-of select="hostnames/hostname/@name"/> (<xsl:value-of select="address/@addr"/>)
+						</xsl:if>
+					
+						<xsl:if test="count(hostnames/hostname) = 0">
+							<xsl:value-of select="address/@addr"/>
+						</xsl:if>
+					</fo:bookmark-title>
+						
+						<xsl:if test="address">
+							<fo:bookmark internal-destination="address.{generate-id()}">
+								<fo:bookmark-title>Address</fo:bookmark-title>
+							</fo:bookmark>
+						</xsl:if>
+						
+						<xsl:if test="count(hostnames/hostname) > 0">
+							<fo:bookmark internal-destination="hostname.{generate-id(hostnames)}">
+								<fo:bookmark-title>Hostname</fo:bookmark-title>
+							</fo:bookmark>
+						</xsl:if>
+						
+						<xsl:if test="ports">
+							<fo:bookmark internal-destination="port.{generate-id(ports)}">
+								<fo:bookmark-title>Ports</fo:bookmark-title>
+							</fo:bookmark>
+						</xsl:if>
+						
+						<xsl:if test="hostscript">
+							<fo:bookmark internal-destination="hostscript.{generate-id(hostscript)}">
+								<fo:bookmark-title>Host Script Output</fo:bookmark-title>
+							</fo:bookmark>
+						</xsl:if>
+						
+						<xsl:if test="trace">
+							<fo:bookmark internal-destination="traceroute.{generate-id(trace)}" >
+								<fo:bookmark-title>Traceroute</fo:bookmark-title>
+							</fo:bookmark>
+						</xsl:if>
 				</fo:bookmark>
 			</xsl:for-each>
+			
+			<xsl:if test="postscript">
+				<fo:bookmark internal-destination="postscript">
+					<fo:bookmark-title>Post-Scan Script Output</fo:bookmark-title>
+				</fo:bookmark>
+			</xsl:if>
+
 		</fo:bookmark-tree>
 
 		<fo:page-sequence master-reference="simple">
@@ -106,12 +161,12 @@
 	<fo:inline font-size="8pt" font-family="sans-serif" font-weight="bold" padding-top="3pt" padding-bottom="3pt" text-align="left" background-color="#CCFFCC" color="#006400">
 	<xsl:if test="count(hostnames/hostname) > 0">
 		<xsl:for-each select="hostnames">
-			<fo:basic-link internal-destination="{generate-id(..)}"><xsl:value-of select="hostname/@name"/> (<xsl:value-of select="$var_address"/>)</fo:basic-link>
+			<fo:basic-link internal-destination="host.{generate-id(..)}"><xsl:value-of select="hostname/@name"/> (<xsl:value-of select="$var_address"/>)</fo:basic-link>
 		</xsl:for-each>
 	</xsl:if>
 
 	<xsl:if test="count(hostnames/hostname) = 0">
-		<fo:basic-link internal-destination="{generate-id()}"><xsl:value-of select="address/@addr"/></fo:basic-link>
+		<fo:basic-link internal-destination="host.{generate-id()}"><xsl:value-of select="address/@addr"/></fo:basic-link>
 	</xsl:if>
 	</fo:inline>
 	
@@ -173,7 +228,7 @@
 <xsl:choose>
 
 	<xsl:when test="status/@state = 'up'">
-	<fo:block font-size="11pt" font-family="sans-serif" font-weight="bold" background-color="#CCFFCC" padding-top="3pt" padding-left="3pt" color="#000000" id="{generate-id()}">
+	<fo:block font-size="11pt" font-family="sans-serif" font-weight="bold" background-color="#CCFFCC" padding-top="3pt" padding-left="3pt" color="#000000" id="host.{generate-id()}">
 	<xsl:value-of select="address/@addr"/>
 	<xsl:if test="count(hostnames/hostname) > 0">
 		<xsl:for-each select="hostnames/hostname">
@@ -185,7 +240,7 @@
 	</xsl:when>
 
 	<xsl:otherwise>
-	<fo:block font-size="11pt" font-family="sans-serif" font-weight="bold" background-color="#CCFFCC" padding-top="3pt" padding-left="3pt" id="{generate-id()}">
+	<fo:block font-size="11pt" font-family="sans-serif" font-weight="bold" background-color="#E1E1E1" padding-top="3pt" padding-left="3pt" id="host.{generate-id()}">
 	<xsl:value-of select="address/@addr"/>
 	<xsl:if test="count(hostnames/hostname) > 0">
 	<xsl:for-each select="hostnames/hostname">
@@ -193,12 +248,13 @@
 			<xsl:text> / </xsl:text><xsl:value-of select="@name"/>
 	</xsl:for-each>
 	</xsl:if>
+	(<xsl:value-of select="status/@state"/>)
 	</fo:block>
 	</xsl:otherwise>
 </xsl:choose>
 
 
-<fo:block font-size="10pt" font-family="sans-serif" font-weight="bold" padding-top="10pt" padding-bottom="5pt" color="#000000">
+<fo:block font-size="10pt" font-family="sans-serif" font-weight="bold" padding-top="10pt" padding-bottom="5pt" color="#000000" id="address.{generate-id()}">
 Address
 </fo:block>
 
@@ -320,7 +376,7 @@ Misc Metrics
 <!-- hostnames -->
 <xsl:template match="hostnames">
 <xsl:if test="hostname/@name != ''">
-	<fo:block font-size="10pt" font-family="sans-serif" font-weight="bold" padding-top="10pt" padding-bottom="5pt" color="#000000">
+	<fo:block font-size="10pt" font-family="sans-serif" font-weight="bold" padding-top="10pt" padding-bottom="5pt" color="#000000" id="hostname.{generate-id()}">
 	Hostnames
 	</fo:block>
 	<xsl:apply-templates/>
@@ -341,7 +397,7 @@ Misc Metrics
 <xsl:template match="ports">
 <xsl:variable name="var_address" select="../address/@addr" />
 
-<fo:block font-size="10pt" font-family="sans-serif" font-weight="bold" padding-top="10pt" padding-bottom="5pt" color="#000000">
+<fo:block font-size="10pt" font-family="sans-serif" font-weight="bold" padding-top="10pt" padding-bottom="5pt" color="#000000" id="port.{generate-id()}">
 Ports
 </fo:block>
 
@@ -561,7 +617,7 @@ Ports
 
 <!-- os -->
 <xsl:template match="os">
-<fo:block font-size="10pt" font-family="sans-serif" font-weight="bold" padding-top="15pt" padding-bottom="5pt" color="#000000">
+<fo:block font-size="10pt" font-family="sans-serif" font-weight="bold" padding-top="15pt" padding-bottom="5pt" color="#000000" id="remote.{generate-id()}">
 Remote Operating System Detection
 </fo:block>
 
@@ -583,6 +639,7 @@ Remote Operating System Detection
 	</fo:block>
 </xsl:for-each>
 
+
 <xsl:apply-templates select="osfingerprint"/>
 
 </xsl:template>
@@ -590,7 +647,8 @@ Remote Operating System Detection
 
 <!-- osfingerprint -->
 <xsl:template match="osfingerprint">
-<xsl:variable name="var_address" select="../../address/@addr" />
+
+<fo:block>&#160;</fo:block>
 
 <xsl:choose>
 <xsl:when test="count(../osmatch)=0">
@@ -695,9 +753,11 @@ Pre-Scan Script Output
 
 <!-- Post-Scan Script -->
 <xsl:template match="postscript">
-<fo:block font-family="sans-serif" font-size="11pt" font-weight="bold" padding-top="10pt" padding-bottom="5pt" background-color="#F0F8FF" id="postscript">
+<fo:block font-family="sans-serif" font-size="11pt" font-weight="bold" padding-top="3pt" background-color="#F0F8FF" id="postscript">
 Post-Scan Script Output
 </fo:block>
+
+<fo:block>&#160;</fo:block>
 
 <fo:table>
 	<fo:table-header>
@@ -739,9 +799,14 @@ Post-Scan Script Output
 
 <!-- Host-Scan Script -->
 <xsl:template match="hostscript">
-<fo:block font-family="sans-serif" font-size="11pt" font-weight="bold" padding-top="10pt" padding-bottom="5pm" background-color="#F0F8FF" id="hostscript">
+
+<fo:block>&#160;</fo:block>
+
+<fo:block font-family="sans-serif" font-size="11pt" font-weight="bold" padding-top="3pt" background-color="#F0F8FF" id="hostscript.{generate-id()}">
 Host-Scan Script Output
 </fo:block>
+
+<fo:block>&#160;</fo:block>
 
 <fo:table>
 	<fo:table-header>
@@ -799,7 +864,7 @@ Host-Scan Script Output
 <xsl:template match="trace">
 <xsl:if test="@proto">
 
-<fo:block font-family="sans-serif" font-size="10pt" font-weight="bold" padding-top="10pt" padding-bottom="5pt">
+<fo:block font-family="sans-serif" font-size="10pt" font-weight="bold" padding-top="10pt" padding-bottom="5pt" id="traceroute.{generate-id()}">
 Traceroute Information
 </fo:block>
 
