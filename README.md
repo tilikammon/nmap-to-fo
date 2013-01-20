@@ -25,5 +25,5 @@ Usage
 
 
 * Convert output xml to pdf using the above xsl file with fop:
-	`fop -xml nmap.scan.xml -xls nmap_fo.xsl -pdf nmap.scan.pdf`
+	`fop -xml nmap.scan.xml -xsl nmap_fo.xsl -pdf nmap.scan.pdf`
 

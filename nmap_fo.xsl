@@ -31,9 +31,20 @@
 ========================================================================== -->
 
 <!-- =========================================================================
-		nmap_fo.xls stylesheet version 1.001
-		last change: 2013-01-04
+		nmap_fo.xls stylesheet version 1.010
+		last change: 2013-01-20
 		Gustave Walzer
+
+		Usage
+		==============
+
+		* Run nmap with -oX flag for xml output:
+		      $  nmap -oX ./nmap.scan.xml localhost
+
+
+		* Convert output xml to pdf using the above xsl file with fop:
+		       $ fop -xml nmap.scan.xml -xsl nmap_fo.xsl -pdf nmap.scan.pdf
+
 ========================================================================== -->
 
 
