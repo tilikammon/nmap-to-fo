@@ -1,5 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- =========================================================================
+		nmap-fo.xls stylesheet version 1.011
+		https://github.com/tilikammon/nmap-to-fo
+		last change: 2013-01-22
+		Gustave Walzer
+
+		Usage
+		==============
+
+		* Run nmap with -oX flag for xml output:
+		      $  nmap -oX ./nmap.scan.xml localhost
+
+
+		* Convert output xml to pdf using the above xsl file with fop:
+		       $ fop -xml nmap.scan.xml -xsl nmap_fo.xsl -pdf nmap.scan.pdf
+
+========================================================================== -->
+
+<!-- =========================================================================
             nmap.xsl stylesheet version 0.9c
             last change: 2010-12-28
             Benjamin Erb, http://www.benjamin-erb.de
@@ -29,24 +47,6 @@
     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
     THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ========================================================================== -->
-
-<!-- =========================================================================
-		nmap_fo.xls stylesheet version 1.010
-		last change: 2013-01-20
-		Gustave Walzer
-
-		Usage
-		==============
-
-		* Run nmap with -oX flag for xml output:
-		      $  nmap -oX ./nmap.scan.xml localhost
-
-
-		* Convert output xml to pdf using the above xsl file with fop:
-		       $ fop -xml nmap.scan.xml -xsl nmap_fo.xsl -pdf nmap.scan.pdf
-
-========================================================================== -->
-
 
 <xsl:stylesheet version="1.0" 
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
